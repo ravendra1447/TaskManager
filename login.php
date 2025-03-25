@@ -29,6 +29,7 @@ if (isset($_SESSION['login_success'])) {
     echo "<script>alert('{$_SESSION['login_success']}');</script>";
     unset($_SESSION['login_success']);
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -65,9 +66,18 @@ if (isset($_SESSION['login_success'])) {
         .btn-primary {
             width: 100%;
         }
-        .error {
-            color: red;
+        .error, .success {
             margin-bottom: 16px;
+            padding: 12px;
+            border-radius: 5px;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
         }
         @media (max-width: 768px) {
             .container {
@@ -75,11 +85,21 @@ if (isset($_SESSION['login_success'])) {
             }
         }
     </style>
+    <script>
+        function hideMessage() {
+            const messages = document.querySelectorAll('.error, .success');
+            messages.forEach((msg) => {
+                setTimeout(() => msg.style.display = 'none', 3000);
+            });
+        }
+        window.onload = hideMessage;
+    </script>
 </head>
 <body>
     <div class="container">
         <h2>Login</h2>
         <?php if (!empty($error_message)) { echo "<div class='error'>$error_message</div>"; } ?>
+        <?php if (!empty($success_message)) { echo "<div class='success'>$success_message</div>"; } ?>
         <form action="login.php" method="post">
             <input type="text" class="form-control" name="username" placeholder="Username" required>
             <input type="password" class="form-control" name="password" placeholder="Password" required>
