@@ -4,6 +4,10 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit;
 }
+if (isset($_SESSION['login_success'])) {
+  echo "<script>alert('{$_SESSION['login_success']}');</script>";
+  unset($_SESSION['login_success']);
+}
 ?>
 
 <!DOCTYPE html>

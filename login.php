@@ -14,19 +14,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (password_verify($password, $user['password'])) {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
+            $_SESSION['login_success'] = "Login successful!";
             header('Location: index.php');
+            exit;
         } else {
-            echo "<div class='error'>Invalid password!</div>";
+            $error_message = "Invalid password!";
         }
     } else {
-        echo "<div class='error'>User not found!</div>";
+        $error_message = "User not found!";
     }
+}
+
+if (isset($_SESSION['login_success'])) {
+    echo "<script>alert('{$_SESSION['login_success']}');</script>";
+    unset($_SESSION['login_success']);
 }
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
     <style>
@@ -60,11 +69,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: red;
             margin-bottom: 16px;
         }
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>Login</h2>
+        <?php if (!empty($error_message)) { echo "<div class='error'>$error_message</div>"; } ?>
         <form action="login.php" method="post">
             <input type="text" class="form-control" name="username" placeholder="Username" required>
             <input type="password" class="form-control" name="password" placeholder="Password" required>
