@@ -8,6 +8,7 @@ if (isset($_SESSION['login_success'])) {
   echo "<script>alert('{$_SESSION['login_success']}');</script>";
   unset($_SESSION['login_success']);
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -18,18 +19,24 @@ if (isset($_SESSION['login_success'])) {
   <title>Task Manager</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
   <script>
-    // Auto reload every 1 minute (60000 ms)
-    setTimeout(() => {
-      location.reload();
-    }, 60000);
-  </script>
+        function hideMessage() {
+            const messages = document.querySelectorAll('.success');
+            messages.forEach((msg) => {
+                setTimeout(() => msg.style.display = 'none', 3000);
+            });
+        }
+        window.onload = hideMessage;
+    </script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
   <div class="container mt-5">
     <h2 class="text-center">Task Manager</h2>
 
+    <div id="message" class="alert d-none"></div>
+
     <!-- Task Form -->
-    <form id="taskForm" class="mb-3" action="add_task.php" method="post">
+    <form id="taskForm" class="mb-3">
       <div class="mb-3">
         <label for="task" class="form-label">Task</label>
         <input type="text" class="form-control" id="task" name="task" required />
@@ -48,53 +55,77 @@ if (isset($_SESSION['login_success'])) {
           <th>Actions</th>
         </tr>
       </thead>
-      <tbody id="taskList">
-        <?php
-        include 'config.php';
-        $user_id = $_SESSION['user_id'];
-        $result = mysqli_query($conn, "SELECT * FROM tasks WHERE user_id = $user_id");
-        while ($row = mysqli_fetch_assoc($result)) {
-          echo "<tr>
-                  <td>{$row['id']}</td>
-                  <td>{$row['task']}</td>
-                  <td>" . ($row['status'] ? 'Completed' : 'Pending') . "</td>
-                  <td>
-                    <a href='mark_complete.php?id={$row['id']}' class='btn btn-success btn-sm'>Complete</a>
-                    <a href='delete_task.php?id={$row['id']}' class='btn btn-danger btn-sm'>Delete</a>
-                  </td>
-                </tr>";
-        }
-        ?>
-      </tbody>
+      <tbody id="taskList"></tbody>
     </table>
-    <a href="logout.php" class="btn btn-danger" onclick="logoutUser(event)">Logout</a>
+    <a href="#" class="btn btn-danger" onclick="logoutUser(event)">Logout</a>
   </div>
+
   <script>
-    const taskForm = document.getElementById('taskForm');
-    taskForm.addEventListener('submit', (e) => {
+    function showMessage(message, type = 'success') {
+      const messageDiv = $('#message');
+      messageDiv.removeClass('d-none').addClass(`alert-${type}`).text(message);
+      setTimeout(() => messageDiv.addClass('d-none').removeClass(`alert-${type}`), 3000);
+    }
+
+    function fetchTasks() {
+      $.ajax({
+        url: 'fetch_tasks.php',
+        method: 'GET',
+        success: function(data) {
+          $('#taskList').html(data);
+        }
+      });
+    }
+
+    $('#taskForm').submit(function(e) {
       e.preventDefault();
-      const task = document.getElementById('task').value;
-      fetch('add_task.php', {
+      const task = $('#task').val();
+      $.ajax({
+        url: 'add_task.php',
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `task=${task}`,
-      })
-        .then((response) => response.text())
-        .then(() => {
-          window.location.reload();
-        });
+        data: { task: task },
+        success: function(response) {
+          showMessage(response);
+          $('#task').val('');
+          fetchTasks();
+        }
+      });
     });
 
-    function logoutUser(event) {
-      event.preventDefault();
-      fetch('logout.php')
-        .then(() => {
-          alert('Logout successful!');
-          window.location.href = 'login.php';
-        });
+    function markComplete(id) {
+      $.ajax({
+        url: 'mark_complete.php',
+        method: 'POST',
+        data: { id: id },
+        success: function(response) {
+          showMessage(response);
+          fetchTasks();
+        }
+      });
     }
+
+    function deleteTask(id) {
+      $.ajax({
+        url: 'delete_task.php',
+        method: 'POST',
+        data: { id: id },
+        success: function(response) {
+          showMessage(response);
+          fetchTasks();
+        }
+      });
+    }
+
+    function logoutUser(event) {
+  event.preventDefault();
+  alert('Logout successful!');
+  window.location.href = 'login.php';
+}
+
+
+    // Initial fetch
+    fetchTasks();
+    setInterval(fetchTasks, 60000); // Refresh every 60 seconds
   </script>
 </body>
 </html>
