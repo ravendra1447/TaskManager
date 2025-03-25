@@ -115,6 +115,10 @@ if (isset($_SESSION['login_success'])) {
         }
       });
     }
+    function editTask(id) {
+  window.location.href = `edit_task.php?id=${id}`;
+}
+
 
     function logoutUser(event) {
   event.preventDefault();

@@ -16,6 +16,7 @@ while ($row = mysqli_fetch_assoc($result)) {
             <td>{$row['task']}</td>
             <td>" . ($row['status'] ? 'Completed' : 'Pending') . "</td>
             <td>
+              <button class='btn btn-sm btn-primary' onclick='editTask({$row['id']})'>Edit</button>
               <button class='btn btn-success btn-sm' onclick='markComplete({$row['id']})'>Complete</button>
               <button class='btn btn-danger btn-sm' onclick='deleteTask({$row['id']})'>Delete</button>
             </td>
