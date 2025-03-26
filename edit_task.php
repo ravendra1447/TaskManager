@@ -64,6 +64,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <button type="submit" class="btn btn-success">Update Task</button>
             <a href="index.php" class="btn btn-secondary">Cancel</a>
         </form>
+
     </div>
+    <script>
+        // Submit Form using AJAX without Reload
+        $('#editForm').submit(function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                task: $('#task').val(),
+                id: $('#task_id').val()
+            };
+
+            $.ajax({
+                url: 'edit_task.php',
+                method: 'POST',
+                data: formData,
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        $('#message').removeClass('d-none alert-danger').addClass('alert-success').text(response.message);
+                        setTimeout(() => {
+                            window.location.href = 'index.php';
+                        }, 1000); // Redirect after 1.5 seconds
+                    } else {
+                        $('#message').removeClass('d-none alert-success').addClass('alert-danger').text(response.message);
+                    }
+                },
+                error: function() {
+                    $('#message').removeClass('d-none alert-success').addClass('alert-danger').text('An error occurred. Please try again.');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

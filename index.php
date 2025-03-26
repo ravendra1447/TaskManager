@@ -115,9 +115,27 @@ if (isset($_SESSION['login_success'])) {
         }
       });
     }
+
+    
     function editTask(id) {
-  window.location.href = `edit_task.php?id=${id}`;
+  $.ajax({
+    url: 'edit_task.php',
+    method: 'GET',
+    data: { id: id },
+    success: function(response) {
+      // Display the edit_task.php content without reloading the page
+      $('.container').html(response);
+    },
+    error: function() {
+      alert('Failed to load edit page.');
+    }
+  });
 }
+
+
+
+
+
 
 
     function logoutUser(event) {
